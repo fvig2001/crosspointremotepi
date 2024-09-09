@@ -19,11 +19,11 @@ def Setup():
 	global ser
 	ser = serial.Serial(
 	        port='/dev/ttyUSB0', #Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
-	        baudrate = 9600, #assuming default
+	        baudrate = 57600, #assuming default
 	        parity=serial.PARITY_NONE,
 	        stopbits=serial.STOPBITS_ONE,
 	        bytesize=serial.EIGHTBITS,
-	        timeout=1
+	        timeout=30
 	)
 
 #for commands too lazy to compute checksum
@@ -63,12 +63,12 @@ def SendCommand(str):
 
 def ChangeInput(input):
 	base = int(input)
-	cmd = base + "*!"
+	cmd = base + "!"
 	SendCommand(cmd)
 	return SendCommand(cmd)
 
 def convertHex(binaryValue):
-	tmpB2 = int(str(binaryValue),2) #Tempary propper base 2
+	tmpB2 = int(str(binaryValue),2) #Tempary proper base 2
 	return hex(tmpB2)
 
 def getBinary():
