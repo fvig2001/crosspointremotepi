@@ -29,7 +29,7 @@ def Setup():
 #for commands too lazy to compute checksum
 def Write(str):
 	global ser
-	string = str + "??\r"
+	string = str + "\r\n"
 	if debug:
 		print("Write: " + string)
 	arr = bytes(string, 'utf-8')
