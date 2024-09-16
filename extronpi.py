@@ -13,6 +13,76 @@ mode = 0
 remotePin = 14
 debug = True
 
+# Constants for NEC protocol (assuming 38 kHz carrier frequency)
+NEC_PULSE_WIDTH_ONE = 560  # in microseconds for logical 1
+NEC_PULSE_WIDTH_ZERO = 560  # in microseconds for logical 0
+NEC_SPACE_WIDTH_ONE = 560   # in microseconds
+NEC_SPACE_WIDTH_ZERO = 1680 # in microseconds
+NEC_HEADER_PULSE = 9000	 # Header pulse width (9 ms)
+NEC_HEADER_SPACE = 4500	 # Header space width (4.5 ms)
+NEC_REPEAT_HEADER_PULSE = 9000  # Repeat header pulse width
+NEC_REPEAT_HEADER_SPACE = 2250  # Repeat header space width
+
+def get_pulse_width(pin):
+	"""Measure the pulse width of the signal on the specified GPIO pin."""
+	# Wait for the pin to go high
+	while GPIO.input(pin) == GPIO.LOW:
+		pass
+	start_time = time.time()
+
+	# Wait for the pin to go low
+	while GPIO.input(pin) == GPIO.HIGH:
+		pass
+	end_time = time.time()
+
+	# Calculate the pulse width in microseconds
+	pulse_width = (end_time - start_time) * 1_000_000
+	return pulse_width
+
+def decode_nec():
+	"""Decode NEC protocol data from GPIO pin."""
+	global remotePin
+	IR_PIN = remotePin
+	while True:
+		# Read header pulse
+		header_pulse = get_pulse_width(IR_PIN)
+		if not (8500 < header_pulse < 9500):
+			continue  # Not a valid header pulse
+
+		# Read header space
+		header_space = get_pulse_width(IR_PIN)
+		if not (4000 < header_space < 5000):
+			continue  # Not a valid header space
+
+		# Read data bits
+		data = 0
+		for _ in range(32):  # NEC data is 32 bits long
+			# Read pulse for data bit
+			pulse_width = get_pulse_width(IR_PIN)
+			if not (500 < pulse_width < 700):
+				continue  # Not a valid pulse width for data
+
+			# Read space after data bit
+			space_width = get_pulse_width(IR_PIN)
+			if (500 < pulse_width < 700) and (1500 < space_width < 2000):
+				data = (data << 1) | 1
+			elif (500 < pulse_width < 700) and (3000 < space_width < 3500):
+				data = (data << 1) | 0
+			else:
+				continue  # Invalid data bit
+
+		# Validate and print decoded data
+		if data != 0xFFFFFFFF:  # Example validation check
+			print(f"Decoded NEC Data: {data:032b} ({data:08X})")
+
+#if __name__ == "__main__":
+#	try:
+#		decode_nec()
+#	except KeyboardInterrupt:
+#		print("Exiting...")
+#	finally:
+#		GPIO.cleanup()
+
 def extract_code_and_time(input_string):
 	# Check if the word "scancode" is in the input string
 	if "scancode" not in input_string:
@@ -91,8 +161,7 @@ def SendCommand(str):
 #	return False
 
 def ChangeInput(input):
-	base = int(input)
-	cmd = str(base) + "!"
+	cmd = str(input) + "*!"
 	#SendCommand(cmd)
 	#return SendCommand(cmd)
 	return True
