@@ -6,7 +6,7 @@ import serial
 from os.path import exists
 
 # Define constants
-remoteChannel = 0
+remoteChannel = 1
 remotePin = 14
 
 # Button definitions
