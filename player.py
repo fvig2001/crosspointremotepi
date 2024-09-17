@@ -46,8 +46,8 @@ def restartRemoteService():
 def setup():
     ReadOnly(True)
     restartRemoteService()
-    myRemoteThread = threading.Thread(target=remoteThread)
-    myRemoteThread.start()
+    #myRemoteThread = threading.Thread(target=remoteThread)
+    #myRemoteThread.start()
     global ser
     ser = serial.Serial(
         port='/dev/ttyUSB0',  # Replace ttyS0 with ttyAM0 for Pi1, Pi2, Pi0
@@ -143,5 +143,5 @@ def remoteThread():
 
 setup()
 ChangeInput(1)
-while True:
-    time.sleep(1)
+remoteThread()
+    
