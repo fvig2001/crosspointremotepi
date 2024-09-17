@@ -3,7 +3,6 @@ import os
 import time
 import re
 import serial
-import threading
 from os.path import exists
 
 # Define constants
